@@ -4,15 +4,33 @@
             background-color: #eeeeee;
             font-family: monospace;
             width: 100%;
+            height: 100%;
         }
         table {
             border: 1px solid black;
+            text-align: center;
         }
         td {
-            width: 14px;
+            width: 15px;
             height: 14px;
         }
     </style>
+    <script>
+        function randomLetters(length) {
+            var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            var b = "";
+            for (var i = 0; i < length; i++) {
+                b = b + letters[Math.floor(Math.random() * letters.length)];
+            }
+            return b;
+        }
+        async function sleep(ms) {
+            await new Promise((resolve, reject) => setTimeout(() => resolve(), ms));
+        }
+        function randomHSL () {
+            return "hsl(" + Math.floor(Math.random()*360) + ",75%,50%)";
+        }
+    </script>
 </head>
 
 <body>
@@ -282,30 +300,32 @@
     <div id="progress">Hello '-')/ ...</div><br/>
     <input id="find" type="text" placeholder="cari..."></input>
     <button onclick="find()">cari! :3</button><br/><br/>
-    <button onclick="fillPuzzle()">random! &gt;_&lt;</button>
+    <button onclick="fillPuzzle()">random! &gt;_&lt;</button><hr/>
+    <a href="/">Home</a>
     <script>
         var a = "";
-        function randomLetters(length) {
-            var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            var b = "";
-            for (var i = 0; i < length; i++) {
-                b = b + letters[Math.floor(Math.random() * letters.length)];
-            }
-            return b;
-        }
-        async function sleep(ms) {
-            await new Promise((resolve, reject) => setTimeout(() => resolve(), ms));
-        }
-        async function fillPuzzle() {
+        async function fillPuzzle () {
             a = "";
             for (var i = 0; i < 15; i++) {
                 a = a + randomLetters(15) + "\n";
             }
             var d = a.split("\n").map(function (v) { return v.split("") });
+            function fillRandom () {
+                for (var i = 0; i < 15; i++) {
+                    for (var j = 0; j < 15; j++) {
+                        document.getElementById(i + "." + j).style = "background-color: hsl(" + Math.floor(Math.random()*360) + ",75%,90%);";
+                        document.getElementById(i + "." + j).innerText = randomLetters(1);
+                    }
+                }
+            }
+            for (var i = 0; i < 15; i++) {
+                await sleep(1);
+                fillRandom();
+            }
             for (var i = 0; i < 15; i++) {
                 for (var j = 0; j < 15; j++) {
-                    await sleep(1);
                     document.getElementById(i + "." + j).innerText = d[i][j];
+                    document.getElementById(i + "." + j).style = "";
                 }
             }
         }
@@ -349,26 +369,58 @@
             for (var m = 0; m < 15; m++) {
                 var value = c[m].join("");
                 for (var _m = 0; _m < 15; _m++) {
-                    document.getElementById(m+"."+_m).style = "background-color: red;";
+                    if (!document.getElementById(m+"."+_m).style.cssText) document.getElementById(m+"."+_m).style = "background-color: red;";
                 }
-                if (new RegExp(document.getElementById("find").value + "|" + document.getElementById("find").value.split("").reverse().join(""), "i").test(value)) result++;
+                var w = document.getElementById("find").value;
+                var q = w + "|" + w.split("").reverse().join("");
+                var r = new RegExp(q, "ig");
+                var t = new RegExp(q, "ig").test(value);
+                if (t) result++;
                 document.getElementById("progress").innerText = "Finding " + value + "... \n(found: " + result + ")";
-                await sleep(30);
+                await sleep(15);
                 for (var _m = 0; _m < 15; _m++) {
-                    document.getElementById(m+"."+_m).style = "";
+                    if (document.getElementById(m+"."+_m).style.cssText === "background-color: red;") document.getElementById(m+"."+_m).style = "";
+                }
+                if (t) {
+                    var color = randomHSL();
+                    var match;
+                    while (match = r.exec(value)) {
+                        var matched = match[0];
+                        var index = match.index;
+                        for (var z = 0; z < matched.length; z++) {
+                            document.getElementById(m+"."+index).style = "background-color: " + color + ";";
+                            index++;
+                        }
+                    }
                 }
             }
 
             for (var m = 0; m < 15; m++) {
                 var value = getDown(m,0);
                 for (var _m = 0; _m < 15; _m++) {
-                    document.getElementById(_m+"."+m).style = "background-color: red;";
+                    if (!document.getElementById(_m+"."+m).style.cssText) document.getElementById(_m+"."+m).style = "background-color: red;";
                 }
-                if (new RegExp(document.getElementById("find").value + "|" + document.getElementById("find").value.split("").reverse().join(""), "i").test(value)) result++;
+                var w = document.getElementById("find").value;
+                var q = w + "|" + w.split("").reverse().join("");
+                var r = new RegExp(q, "ig");
+                var t = new RegExp(q, "ig").test(value);
+                if (t) result++;
                 document.getElementById("progress").innerText = "Finding " + value + "... \n(found: " + result + ")";
-                await sleep(30);
+                await sleep(15);
                 for (var _m = 0; _m < 15; _m++) {
-                    document.getElementById(_m+"."+m).style = "";
+                    if (document.getElementById(_m+"."+m).style.cssText === "background-color: red;") document.getElementById(_m+"."+m).style = "";
+                }
+                if (t) {
+                    var color = randomHSL();
+                    var match;
+                    while (match = r.exec(value)) {
+                        var matched = match[0];
+                        var index = match.index;
+                        for (var z = 0; z < matched.length; z++) {
+                            document.getElementById(index+"."+m).style = "background-color: " + color + ";";
+                            index++;
+                        }
+                    }
                 }
             }
 
@@ -377,17 +429,35 @@
                 var $x = m > 14 ? m-14 : 0, $y = m > 14 ? 0 : 14-m;
                 while (true) {
                     if (!document.getElementById($y + "." + $x)) break;
-                    document.getElementById($y + "." + $x).style = "background-color: red;";
+                    if (!document.getElementById($y + "." + $x).style.cssText) document.getElementById($y + "." + $x).style = "background-color: red;";
                     $x++; $y++;
                 }
-                if (new RegExp(document.getElementById("find").value + "|" + document.getElementById("find").value.split("").reverse().join(""), "i").test(value)) result++;
+                var w = document.getElementById("find").value;
+                var q = w + "|" + w.split("").reverse().join("");
+                var r = new RegExp(q, "ig");
+                var t = new RegExp(q, "ig").test(value);
+                if (t) result++;
                 document.getElementById("progress").innerText = "Finding " + value + "... \n(found: " + result + ")";
-                await sleep(30);
+                await sleep(15);
                 var $x = m > 14 ? m-14 : 0, $y = m > 14 ? 0 : 14-m;
                 while (true) {
                     if (!document.getElementById($y + "." + $x)) break;
-                    document.getElementById($y + "." + $x).style = "";
+                    if (document.getElementById($y + "." + $x).style.cssText === "background-color: red;") document.getElementById($y + "." + $x).style = "";
                     $x++; $y++;
+                }
+                if (t) {
+                    var color = randomHSL();
+                    var match;
+                    var $x = m > 14 ? m-14 : 0, $y = m > 14 ? 0 : 14-m;
+                    while (match = r.exec(value)) {
+                        var matched = match[0];
+                        var index = $x + match.index;
+                        var yindex = $y + match.index;
+                        for (var z = 0; z < matched.length; z++) {
+                            document.getElementById(yindex + "." + index).style = "background-color: " + color + ";";
+                            index++; yindex++;
+                        }
+                    }
                 }
             }
 
@@ -396,17 +466,35 @@
                 var $x = m < 14 ? m : 14, $y = m < 14 ? 0 : m-14;
                 while (true) {
                     if (!document.getElementById($y + "." + $x)) break;
-                    document.getElementById($y + "." + $x).style = "background-color: red;";
+                    if (!document.getElementById($y + "." + $x).style.cssText) document.getElementById($y + "." + $x).style = "background-color: red;";
                     $x--; $y++;
                 }
-                if (new RegExp(document.getElementById("find").value + "|" + document.getElementById("find").value.split("").reverse().join(""), "i").test(value)) result++;
+                var w = document.getElementById("find").value;
+                var q = w + "|" + w.split("").reverse().join("");
+                var r = new RegExp(q, "ig");
+                var t = new RegExp(q, "ig").test(value);
+                if (t) result++;
                 document.getElementById("progress").innerText = "Finding " + value + "... \n(found: " + result + ")";
-                await sleep(30);
+                await sleep(15);
                 var $x = m < 14 ? m : 14, $y = m < 14 ? 0 : m-14;
                 while (true) {
                     if (!document.getElementById($y + "." + $x)) break;
-                    document.getElementById($y + "." + $x).style = "";
+                    if (document.getElementById($y + "." + $x).style.cssText === "background-color: red;") document.getElementById($y + "." + $x).style = "";
                     $x--; $y++;
+                }
+                if (t) {
+                    var color = randomHSL();
+                    var match;
+                    var $x = m < 14 ? m : 14, $y = m < 14 ? 0 : m-14;
+                    while (match = r.exec(value)) {
+                        var matched = match[0];
+                        var index = $x - match.index;
+                        var yindex = $y + match.index;
+                        for (var z = 0; z < matched.length; z++) {
+                            document.getElementById(yindex + "." + index).style = "background-color: " + color + ";";
+                            index--; yindex++;
+                        }
+                    }
                 }
             }
 
