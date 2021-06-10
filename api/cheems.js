@@ -9,7 +9,7 @@ module.exports = (req, res) => {
         ok: true,
         data: {
             query: text,
-            result: text.toLowerCase()
+            result: text.toLowerCase().replace(/(?<=(?:[^]+|^)(?:[aiueoy]+))(?![^b-df-hj-lnp-tv-xyz]+|y+(?![aiueo])|$)/gi, 'm')
         },
         creator: 'CietstHydroxide'
     });

@@ -1,21 +1,16 @@
-const x = {};
-
-x.start = (req, res) => {
+module.exports = (req, res) => {
     const text = req.query.q;
     if (!text) return res.status('404').send({
-        status: res.statusCode,
-        message: 'q parameter is required.'
+        ok: false,
+        message: 'q parameter is required.',
+        creator: 'CietstHydroxide'
     });
     return res.status('200').send({
-        status: res.statusCode,
-        creator: 'CietstHydroxide',
+        ok: true,
         data: {
             query: text,
             result: text.toUpperCase()
-        }
+        },
+        creator: 'CietstHydroxide',
     });
 }
-
-x.api = 'uppercase';
-
-module.exports = x;
